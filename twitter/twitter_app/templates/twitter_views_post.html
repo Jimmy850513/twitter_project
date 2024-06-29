@@ -1,0 +1,245 @@
+{% extends 'index.html' %}
+{% block stylesheet %}
+<style>
+    .post-container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .post-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .post-meta {
+        color: #6c757d;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    .post-content {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    .post-footer {
+        margin-top: 30px;
+        border-top: 1px solid #e9ecef;
+        padding-top: 10px;
+    }
+    .comment {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f1f3f5;
+    }
+    .comment-author {
+        font-weight: bold;
+    }
+    .comment-text {
+        margin-top: 5px;
+    }
+    .new-comment {
+        margin-top: 30px;
+    }
+    .modal{
+        display:none;
+    }
+    .like-btn {
+        cursor: pointer;
+        color: gray;
+    }
+    .liked {
+        color: red;
+    }
+    .follow-btn {
+        cursor: pointer;
+        color: gray;
+    }
+    .followed {
+        color: blue;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="post-container">
+    {% csrf_token %}
+    <div id="container5" style="display:none;">
+        <input name="user_check" id="user_check" value="{{outline_d.user_id}}">
+    </div>
+    {% for data in data_ld %}
+    <div class="post-title">{{data.post_title}}</div>
+    
+    <div class="post-meta">Posted by {{data.username}} on {{data.post_date}}</div>
+    <div class="post-content">
+        <p>{{data.post_body}}</p>
+        <i class="fa fa-heart like-btn" id="like-button"></i>
+        <i class="fa fa-user-plus follow-btn" id="follow-button"></i>
+    </div>
+    
+    <div style="display:none;">
+        <input type="text" name="post_id" id="post_id" value="{{data.post_id}}">
+        <input type="text" name="like_post" id="like_post" value="">
+    </div>
+    {% endfor %}
+    <div class="post-footer">
+        <h5>Comments</h5>
+        {% for data in data_ld2 %}
+        <div class="comment" data-comment="{{data.comment_id}}" data-user_id="{{data.user_id}}"
+        data-comment_text="{{data.post_comment}}">
+            <div class="comment-author">{{data.username}}</div>
+            <div class="comment-text">{{data.post_comment}}</div>
+            <div id="container4" style="display:none;">
+                <input type="text" name="comment_id" id="comment_id">
+                <input type="text" name="user_id" id="user_id">
+            </div>
+        </div>
+        {% endfor %}
+        {% if outline_d.user_id %}
+        <div class="new-comment">
+            <h6>Add a Comment</h6>
+            <form>
+                <div class="form-group">
+                    <label for="comment-text">Comment</label>
+                    <textarea class="form-control" id="comment-text" name="post_comment" rows="3" placeholder="寫下你的留言...">
+                    </textarea>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="add_comment();" id="create_comment">新增留言</button>
+                <button type="button" class="btn btn-primary" onclick="update_comment();" id="update_button">更新留言</button>
+                <button type="button" class="btn btn-primary" onclick="delete_comment();" id="delete_button">刪除留言</button>
+                <button type="button" class="btn btn-primary" onclick="homePage();">回上一頁</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+<div class="modal" id="modal_msg" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">提示訊息</h5>
+        </div>
+        <div class="modal-body" id="modal_content">
+            
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jsfunction %}
+<script>
+    function homePage(){
+        window.location.href='/';
+    }
+    function showmodal(msg){
+        $("#modal_msg").css("display",'block');
+        document.getElementById("modal_content").innerHTML = '<p>'+msg+'</p>'
+    }
+    function hideModal(){
+        $("#modal_msg").css("display",'none');
+        location.reload();
+    }
+    function add_comment(){
+        let formdata = new FormData();
+        let csrf_token = $("input[name='csrfmiddlewaretoken']").val();
+        formdata.append("post_comment",$("#comment-text").val());
+        formdata.append("post_id",$("#post_id").val());
+        formdata.append("fmTextOP","CREATE");
+        fetch('/add_comment/',{method:"POST",headers:{
+            'X-CSRFToken':csrf_token
+        },body:formdata}).then((response)=>{
+            return response.json();
+        }).then((response)=>{
+            showmodal(response.data.msg);
+        }).catch((e)=>{
+            console.log(e)
+        })
+    }
+
+    function update_comment(){
+        let formdata = new FormData();
+        let csrf_token = $("input[name='csrfmiddlewaretoken']").val();
+        formdata.append("post_comment",$("#comment-text").val());
+        formdata.append("comment_id",$("#comment_id").val());
+        formdata.append("fmTextOP","UPDATE");
+        fetch('/add_comment/',{method:"POST",headers:{
+            'X-CSRFToken':csrf_token
+        },body:formdata}).then((response)=>{
+            return response.json();
+        }).then((response)=>{
+            showmodal(response.data.msg);
+        }).catch((e)=>{
+            console.log(e)
+        })
+    }
+    function delete_comment(){
+        let formdata = new FormData();
+        let csrf_token = $("input[name='csrfmiddlewaretoken']").val();
+        formdata.append("comment_id",$("#comment_id").val());
+        formdata.append("fmTextOP","DELETE");
+        fetch('/add_comment/',{method:"POST",headers:{
+            'X-CSRFToken':csrf_token
+        },body:formdata}).then((response)=>{
+            return response.json();
+        }).then((response)=>{
+            showmodal(response.data.msg);
+        }).catch((e)=>{
+            console.log(e)
+        })
+    }
+    $( document ).ready(function() {
+        $("#update_button").prop("disabled",true);
+        $("#delete_button").prop("disabled",true);
+        $(".comment").on("click",function(){
+            let user_id = $(this).data('user_id');
+            if(user_id == $("#user_check").val()){
+                $("#update_button").prop("disabled",false);
+                $("#create_comment").prop("disabled",true);
+                $("#delete_button").prop("disabled",false);
+                let comment = $(this).data("comment_text");
+                let comment_id = $(this).data("comment");
+                $("#comment-text").val(comment);
+                $("#user_id").val(user_id);
+                $("#comment_id").val(comment_id);
+            }else{
+                return; 
+            }
+            
+        })
+        $('#like-button').click(function() {
+            $(this).toggleClass('liked');
+            if ($(this).hasClass('liked')) {
+                $("#like_post").val(1);
+                let csrf_token = $("input[name='csrfmiddlewaretoken']").val();
+                let formdata = new FormData();
+                formdata.append("like_post",$("#like_post").val());
+                formdata.append("post_id",$("#post_id").val());
+                formdata.append("fmTextOP","LIKE")
+                fetch('/add_comment/',{method:"POST",headers:{
+                    'X-CSRFToken':csrf_token
+                },body:formdata})
+            } else {
+                $("#like_post").val(0);
+                console.log('Unliked');
+            }
+        });
+        $('#follow-button').click(function() {
+            $(this).toggleClass('followed');
+            if ($(this).hasClass('followed')) {
+                // Perform the follow action, e.g., send a request to the server
+                console.log('Followed');
+            } else {
+                // Perform the unfollow action, e.g., send a request to the server
+                console.log('Unfollowed');
+            }
+        });
+    });
+
+</script>
+{% endblock %}

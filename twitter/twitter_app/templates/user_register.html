@@ -1,0 +1,138 @@
+{% extends 'index.html' %}
+{% block stylesheet %}
+<style>
+
+.container {
+        margin-top:6em;
+        width:35em;
+        padding:3em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f0f2f5;
+        border:2px solid black;
+    }
+
+.registration-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.registration-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #5cb85c;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+#modal{
+    display:none;
+}
+</style>  
+{% endblock %}
+{% block content %}
+    <div id="container1">
+        {% csrf_token %}
+        <h2>註冊</h2>
+        <div class="form-group">
+            <label for="username">用戶名</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">電子郵件</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">密碼</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="confirm-password">確認密碼</label>
+            <input type="password" id="confirm-password" name="confirm-password" required>
+        </div>
+        <button type="button" onclick="doSaveData();">註冊</button>
+    </div>
+        <div class="modal" id="modal" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Modal title</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modal_content">
+                  
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+                  <button type="button" class="btn btn-primary" id="return_page" onclick="login_Page();">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+{% endblock %}
+{% block jsfunction %}
+<script>
+function login_Page(){
+    window.location.href = "/user_login/";
+}
+function showModal(msg){
+    document.getElementById('modal').style.display = 'block';
+    $('#modal_content').text(msg);
+}
+function hideModal(){
+    document.getElementById("modal").style.display = 'none';
+}
+function doSaveData(){
+    let formdata = new FormData();
+    let csrf_token = $("input[name='csrfmiddlewaretoken']").val()
+    formdata.append("username",$("#username").val());
+    formdata.append("password",$("#password").val());
+    formdata.append("confirm-password",$("#confirm-password").val());
+    formdata.append("email",$("#email").val());
+    fetch('/user_register/',{method:"POST",headers:{
+        'X-CSRFToken':csrf_token
+    },body:formdata}).then((response)=>{
+        return response.json()
+    }).then((response)=>{
+        if (response.data.status == 'OK'){
+            showModal(response.data.msg);
+            $("#close_msg").css("display","none");
+        }else{
+            showModal(response.data.msg);
+            $("#return_page").css("display","none");
+        }
+    }).catch((e)=>{
+        console.log(e);
+    })
+}
+</script>
+{% endblock %}

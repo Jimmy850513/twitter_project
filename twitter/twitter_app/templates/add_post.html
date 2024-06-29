@@ -1,0 +1,89 @@
+{% extends 'index.html' %}
+{% block stylesheet %}
+<style>
+    .modal{
+        display:none;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="row justify-content-center mt-3">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h4>新增貼文</h4>
+          </div>
+          <div class="card-body">
+            {% csrf_token %}
+              <div class="form-group">
+                <label for="postTitle">文章標題</label>
+                <input type="text" class="form-control" id="postTitle" name="post_title" placeholder="輸入標題">
+              </div>
+              <div class="form-group">
+                <label for="postContent">文章內容</label>
+                <textarea class="form-control" id="postContent" rows="5" name="post_body" placeholder="輸入內容"></textarea>
+              </div>
+              <button type="button" onclick="add_post();" class="btn btn-success">提交貼文</button>
+          </div>
+        </div>
+      </div>
+</div>
+<div class="modal" id="modal_msg" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">提示訊息</h5>
+        </div>
+        <div class="modal-body" id="modal_content">
+            
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+          <button type="button" class="btn btn-secondary" id="home_page" onclick="home_page();">回首頁看文章</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block jsfunction %}
+<script>
+    function showmodal(msg){
+        document.getElementById('modal_msg').style.display = 'block'
+        document.getElementById('modal_content').innerHTML = '<p>'+ msg + '</p>';
+    }
+    function hideModal(){
+        document.getElementById('modal_msg').style.display = 'none';
+    }
+    function home_page(){
+        window.location.href='/';
+    }
+    function add_post(){
+        let formdata = new FormData();
+        let csrf_token = $("input[name='csrfmiddlewaretoken']").val()
+        formdata.append('post_title',$("#postTitle").val());
+        formdata.append('post_body',$("#postContent").val());
+        formdata.append('fmTextOP','SAVE')
+        fetch('/add_post/',{method:'POST',headers:{
+            'X-CSRFToken':csrf_token
+        },body:formdata}).then((response)=>{
+            return response.json()
+        }).then((response)=>{
+            if (response.data.status=='OK'){
+                showmodal('新增成功！');
+            }else{
+                $("#home_page").css("display",'none')
+                showmodal("新增失敗");
+                return
+            }
+        }).catch((e)=>{
+            console.log(e);
+        })
+    }
+
+
+</script>
+{% endblock %}

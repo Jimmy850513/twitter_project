@@ -1,0 +1,35 @@
+{% extends 'index.html' %}
+{% block stylesheet %}
+<style>
+
+</style>
+{% endblock %}
+
+{% block content %}
+{% for data in data_ld %}
+<div class="card mt-3">
+    {% csrf_token %}
+    <h5 class="card-header">文章</h5>
+    <div class="card-body">
+      <h5 class="card-title">{{data.post_title}}</h5>
+      <p class="card-text">{{data.post_body|truncatechars:50 }}</p>
+      <a href="{% url 'personal_update_post' data.post_id %}" class="btn btn-primary">編輯文章</a>
+    </div>
+</div>
+{% endfor %}
+<div id="user_detail" style="display:none;">
+    <input type="text" value="{{outline_d.user_id}}" id="user_id">
+    <input type="text" value="{{outline_d.username}}" id="username">
+</div>
+{% endblock %}
+
+{% block jsfunction %}
+<script>
+    function Add_Post(){
+        
+    }
+    function see_post_detail(){
+        
+    }
+</script>
+{% endblock %}

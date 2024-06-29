@@ -1,0 +1,250 @@
+{% extends 'index.html' %}
+
+{% block stylesheet %}
+<style>
+.profile-container{
+    border:2px solid black;
+    width:40em;
+    
+    margin:10em;
+    margin-left:20em;
+    background-color:
+}
+.profile-header{
+    padding:1.5em;
+}
+.profile-body{
+    padding:1.5em;
+}
+.modal{
+    display:none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container" >
+    <div class="profile-header">
+        <h1 class="profile-name">{{data_ld.username}}</h1>
+        <label id="job_title" style="font-size:24pt;">職位：</label>
+        <h2 class="profile-job" id="user_job_title_text">{{data_ld.job_title}}</h2>
+    </div>
+    <div class="profile-body" id="user_profile1">
+        <h3 class="mt-1">自我介紹</h3>
+        <h5 class="profile-bio" id='user_introduction_text'>
+           {{data_ld.user_profile1}}
+        </h5>
+    </div>
+    <div class="profile-body" id="user_birthday">
+        <h3 class="mt-1">我的生日</h3>
+        <p>(只能編輯一次,編輯完成後如要修改請聯繫客服)</p>
+        <h5 class="profile-bio" id='user_birthday_text'>
+           {{data_ld.user_birthday}}
+        </h5>
+    </div>
+    <div class="profile-body" id="user_profile2">
+        <h3 class="mt-1">我喜歡的食物</h3>
+        <h5 class="profile-bio" id="user_profile2_text">
+            {{data_ld.user_profile2}}
+        </h5>
+    </div>
+    <div class="profile-body" id="user_profile3">
+        <h3 class="mt-1">我的興趣</h3>
+        <h5 class="profile-bio" id="user_profile3_text">
+            {{data_ld.user_profile3}}
+        </h5>
+    </div>
+    <div class="profile-body" id="user_follower">
+        <h3 class="mt-1">我追蹤的人</h3>
+        <h5 class="profile-bio">
+            Hi, I'm John Doe. I'm a passionate software developer with over 10 years of experience in building web applications. I love coding and enjoy learning new technologies.
+        </h5>
+    </div>
+</div>
+{% csrf_token %}
+<div class="modal" id="modal_user_job_title" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">請輸入你的職位</h5>
+        </div>
+        <div class="modal-body" id="modal_content">
+            <input name="job_title" id="user_job_title" placeholder="請輸入你的職位">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+          <button type="button" class="btn btn-primary" id="return_page" onclick="doSaveData();">儲存變更</button>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="modal" id="modal_user_profile1" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">請輸入你的自我介紹</h5>
+        </div>
+        <div class="modal-body" id="modal_content">
+            <textarea name="user_profile1" id="user_introduction" rows="4" cols="45" placeholder="Write something about yourself..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+          <button type="button" class="btn btn-primary" id="return_page" onclick="doSaveData();">儲存變更</button>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="modal" id="modal_user_birthday" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">請輸入你的生日</h5>
+        </div>
+        <div class="modal-body" id="modal_content">
+            <input type="date" name="user_birthday" id="user_birthday_input">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+          <button type="button" class="btn btn-primary" id="return_page" onclick="doSaveData();">儲存變更</button>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="modal" id="modal_user_profile2" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">請輸入你喜歡吃什麼</h5>
+        </div>
+        <div class="modal-body" id="modal_content">
+            <textarea name="user_profile2" id="user_like_to_eat" rows="4" cols="45" placeholder="寫一些你愛吃的食物"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+          <button type="button" class="btn btn-primary" id="return_page" onclick="doSaveData();">儲存變更</button>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="modal" id="modal_user_profile3" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">請輸入你的興趣</h5>
+        </div>
+        <div class="modal-body" id="modal_content">
+            <textarea name="user_profile3" id="user_habits" rows="4" cols="45" placeholder="寫一些你的興趣跟愛好..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+          <button type="button" class="btn btn-primary" id="return_page" onclick="doSaveData();">儲存變更</button>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jsfunction %}
+<script>
+      function removeExtraSpaces(text) {
+        return text.replace(/\s+/g, ' ').trim();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let user_introduction = document.getElementById('user_introduction');
+        let user_like_to_eat = document.getElementById('user_like_to_eat');
+        let user_habits = document.getElementById('user_habits');
+        if (user_introductiont) {
+            user_introduction.textContent = removeExtraSpaces(user_introduction.textContent);
+        }
+        if (user_like_to_eat) {
+          user_like_to_eat.textContent = removeExtraSpaces(user_like_to_eat.textContent);
+        }
+        if (user_habits) {
+          user_habits.textContent = removeExtraSpaces(user_habits.textContent);
+        }
+        
+    });
+
+    function showModal(msg){
+        document.getElementById('modal').style.display = 'block';
+    }
+    function hideModal(){
+        $(".modal").css("display",'none');
+    }
+    
+    function doSaveData(){
+        $(".modal").css("display",'none');
+        let csrf_token = $("input[name='csrfmiddlewaretoken']").val()
+        let formdata = new FormData()
+        formdata.append("job_title",$("#user_job_title").val());
+        formdata.append("user_profile1",$("#user_introduction").val());
+        formdata.append("user_birthday",$("#user_birthday_input").val());
+        formdata.append("user_profile2",$("#user_like_to_eat").val());
+        formdata.append("user_profile3",$("#user_habits").val());
+        formdata.append("fmTextOP","SAVE");
+        fetch("/user_profile/",{method:"POST",headers:{
+            'X-CSRFToken':csrf_token
+        },body:formdata}).then((response)=>{
+            return response.json();
+        }).then((response)=>{
+            location.reload();
+        }).catch((e)=>{
+            console.log(e)
+        })
+    }
+    $("#job_title").on("click",function(){
+        $("#modal_user_job_title").css('display','block');
+        $("#user_job_title").val($("#user_job_title_text").text());
+        $("#modal_user_profile2").css('display','none');
+        $("#modal_user_profile3").css('display','none');
+        $("#modal_user_birthday").css('display','none');
+        $("#modal_user_profile1").css('display','none');
+    })
+    $("#user_profile1").on("click",function(){
+        $("#user_introduction").val($("#user_introduction_text").text());
+        $("#modal_user_profile1").css('display','block');
+        $("#modal_user_profile2").css('display','none');
+        $("#modal_user_profile3").css('display','none');
+        $("#modal_user_birthday").css('display','none');
+        $("#modal_user_job_title").css('display','none');
+    })
+    $("#user_profile2").on("click",function(){
+        $("#user_like_to_eat").val($("#user_profile2_text").text());
+        $("#modal_user_profile1").css('display','none');
+        $("#modal_user_profile2").css('display','block');
+        $("#modal_user_profile3").css('display','none');
+        $("#modal_user_birthday").css('display','none');
+        $("#modal_user_job_title").css('display','none');
+    })
+    if (!$("#user_birthday_text")){
+      $("#user_birthday").on("click",function(){
+        let date = $("#user_birthday_text").text();
+        console.log(date);
+        let date1 = new Date(date);
+        console.log(date1);
+        let year = date1.getFullYear();
+        let month = ("0" + (date1.getMonth() + 1)).slice(-2);
+        let day = ("0" + date1.getDate()).slice(-2);
+        let formattedDate = `${year}-${month}-${day}`;
+        $("#user_birthday_input").val(formattedDate);
+        $("#modal_user_profile1").css('display','none');
+        $("#modal_user_profile2").css('display','none');
+        $("#modal_user_profile3").css('display','none');
+        $("#modal_user_birthday").css('display','block');
+        $("#modal_user_job_title").css('display','none');
+    })
+    }
+    
+    $("#user_profile3").on("click",function(){
+        $("#user_habits").val($("#user_profile3_text").text());
+        $("#modal_user_profile1").css('display','none');
+        $("#modal_user_profile2").css('display','none');
+        $("#modal_user_profile3").css('display','block');
+        $("#modal_user_birthday").css('display','none');
+        $("#modal_user_job_title").css('display','none');
+
+    })
+
+</script>
+{% endblock %}

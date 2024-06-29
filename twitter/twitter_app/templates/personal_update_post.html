@@ -1,0 +1,133 @@
+{% extends 'index.html' %}
+{% block stylesheet %}
+<style>
+    .modal{
+        display:none;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+{% csrf_token %}
+{% for data in data_ld %}
+<div class="row justify-content-center mt-3">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h4>更新貼文</h4>
+          </div>
+         
+          <div class="card-body">
+              <div class="form-group">
+                <label for="postTitle">文章標題</label>
+                <input type="text" class="form-control" id="postTitle" name="post_title" value="{{data.post_title}}">
+              </div>
+              <div class="form-group">
+                <label for="postContent">文章內容</label>
+                <textarea class="form-control" id="postContent" rows="5" name="post_body" style="text-align:left;">
+                    {{ data.post_body|cut:" " }}
+                </textarea>
+              </div>
+              <button type="button" class="btn btn-success" onclick="update_post();">更新貼文</button>
+              <button type="button" class="btn btn-success" onclick="delete_post();">刪除貼文</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:none;">
+        <input type='text' name='post_id' id="post_id" value="{{outline_d.post_id}}">
+      </div>
+</div>
+{% endfor %}
+<div class="modal" id="modal_msg" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">提示訊息</h5>
+        </div>
+        <div class="modal-body" id="modal_content">
+            
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close_msg" data-bs-dismiss="modal" onclick="hideModal();">Close</button>
+          <button type="button" class="btn btn-secondary" id="home_page" onclick="home_page();">返回個人文章</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block jsfunction %}
+<script>
+    //去除text area的空格
+    function removeExtraSpaces(text) {
+        return text.replace(/\s+/g, ' ').trim();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let postContent = document.getElementById('postContent');
+        if (postContent) {
+            postContent.textContent = removeExtraSpaces(postContent.textContent);
+        }
+    });
+    function showmodal(msg){
+        document.getElementById('modal_msg').style.display = 'block'
+        document.getElementById('modal_content').innerHTML = '<p>'+ msg + '</p>';
+    }
+    function hideModal(){
+        document.getElementById('modal_msg').style.display = 'none';
+    }
+    function home_page(){
+        window.location.href='/personal_views_post/';
+    }
+    function update_post(){
+        let formdata = new FormData();
+        let post_id = $("#post_id").text()
+        let csrf_token = $("input[name='csrfmiddlewaretoken']").val()
+        formdata.append('post_title',$("#postTitle").val());
+        formdata.append('post_body',$("#postContent").val());
+        formdata.append('post_id',$("#post_id").val());
+        formdata.append('fmTextOP','UPDATE')
+        fetch('/personal_update_post2/',{method:'POST',headers:{
+            'X-CSRFToken':csrf_token
+        },body:formdata}).then((response)=>{
+            return response.json()
+        }).then((response)=>{
+            if (response.data.status=='OK'){
+                showmodal('更新成功！');
+            }else{
+                $("#home_page").css("display",'none')
+                showmodal("更新失敗");
+                return
+            }
+        }).catch((e)=>{
+            console.log(e);
+        })
+    }
+    function delete_post(){
+        let formdata = new FormData();
+        let post_id = $("#post_id").text()
+        let csrf_token = $("input[name='csrfmiddlewaretoken']").val()
+        formdata.append('post_id',$("#post_id").val());
+        formdata.append('fmTextOP','DELETE');
+        fetch('/personal_update_post2/',{method:'POST',headers:{
+            'X-CSRFToken':csrf_token
+        },body:formdata}).then((response)=>{
+            return response.json()
+        }).then((response)=>{
+            if (response.data.status=='OK'){
+                showmodal(response.data.msg);
+            }else{
+                $("#home_page").css("display",'none')
+                showmodal(response.data.msg);
+                return
+            }
+        }).catch((e)=>{
+            console.log(e);
+        })
+    }
+
+
+</script>
+{% endblock %}
